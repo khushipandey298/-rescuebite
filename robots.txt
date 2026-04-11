@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Block common bot paths
+Disallow: /api/
+Disallow: /logs/
+Disallow: /uploads/
+Disallow: /node_modules/
+Disallow: /.env
+Disallow: /admin/
+
+# Allow search engines to index main content
+Allow: /$
+Allow: /index.html
+Allow: /manifest.json
+Allow: /static/

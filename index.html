@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rescue Bite | Jamshedpur Unified</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-h-screen; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-glow { background: linear-gradient(90deg, #6366f1, #a855f7); transition: 0.3s; }
+        .btn-glow:hover { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); transform: translateY(-1px); }
+        #map { height: 180px; width: 100%; border-radius: 12px; }
+        .hidden { display: none; }
+        .role-card:hover { border-color: #6366f1; background: rgba(99, 102, 241, 0.1); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        main { flex: 1; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<nav class="p-4 flex justify-between items-center glass sticky top-0 z-50">
+    <h1 class="text-xl font-black tracking-tighter text-indigo-400">RESCUE BITE 📍 JSR</h1>
+    <div class="flex gap-4 items-center">
+        <button onclick="toggleHelp()" class="text-sm bg-white/10 px-3 py-1 rounded-full">🆘 Help Desk</button>
+        <div id="navUser" class="text-sm font-medium text-indigo-200"></div>
+    </div>
+</nav>
+
+<main class="max-w-md mx-auto p-6 w-full">
+
+    <section id="loginPage">
+        <div class="glass p-8 rounded-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-center">Secure Sign In</h2>
+            <input id="lEmail" type="email" placeholder="Email / Admin ID" class="w-full bg-black/20 p-3 rounded-lg mb-4 border border-white/10">
+            <input id="lPass" type="password" placeholder="Password" class="w-full bg-black/20 p-3 rounded-lg mb-4 border border-white/10">
+            
+            <div class="bg-indigo-500/10 p-3 rounded-lg mb-4 flex justify-between items-center border border-indigo-500/30">
+                <span id="captchaValue" class="font-mono font-bold tracking-widest text-indigo-300"></span>
+                <input id="captchaInput" placeholder="Verify" class="w-20 bg-black/40 p-1 rounded text-center">
+            </div>
+
+            <button onclick="handleLogin()" class="btn-glow w-full py-3 rounded-lg font-bold">Access Portal</button>
+            <p class="text-center text-sm mt-6 text-gray-400">New rescue agent? <span onclick="showPage('signupPage')" class="text-indigo-400 cursor-pointer">Register here</span></p>
+        </div>
+    </section>
+
+    <section id="signupPage" class="hidden">
+        <div class="glass p-8 rounded-2xl">
+            <h2 class="text-2xl font-bold mb-6">Create Account</h2>
+            <div class="space-y-4">
+                <input id="sName" placeholder="Full Name" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+                <input id="sEmail" type="email" placeholder="Email" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+                <input id="sPass" type="password" placeholder="Password" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+                <div class="border-t border-white/10 pt-4">
+                    <p class="text-xs text-gray-400 mb-2">GOVERNMENT VERIFICATION</p>
+                    <select id="idType" class="w-full bg-black/20 p-3 rounded-lg mb-2 text-gray-400">
+                        <option>Aadhar Card</option>
+                        <option>Voter ID</option>
+                        <option>PAN Card</option>
+                    </select>
+                    <input id="idNumber" placeholder="ID Number" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roleSelectionPage" class="hidden">
+        <h2 class="text-2xl font-bold mb-2">Define Identity</h2>
+        <p class="text-sm text-gray-400 mb-6">Define your role in the Jamshedpur ecosystem</p>
+        <div class="grid gap-4">
+            <div onclick="selectRole('provider')" class="role-card glass p-6 rounded-xl cursor-pointer border border-transparent transition">
+                <h3 class="font-bold text-indigo-400">Food Provider</h3>
+                <p class="text-xs text-gray-400">I have surplus food to donate</p>
+            </div>
+            <div onclick="selectRole('receiver')" class="role-card glass p-6 rounded-xl cursor-pointer border border-transparent transition">
+                <h3 class="font-bold text-indigo-400">Food Receiver</h3>
+                <p class="text-xs text-gray-400">I am an NGO/Org helping the needy</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="providerOnboarding" class="hidden">
+        <div class="glass p-6 rounded-2xl">
+            <h2 class="text-xl font-bold mb-4">Food & Provider Details</h2>
+            <div class="space-y-4">
+                <select id="providerType" class="w-full bg-black/20 p-3 rounded-lg border border-white/10 text-gray-300">
+                    <option value="" disabled selected>Select Entity Type</option>
+                    <option value="Restaurant">Restaurant</option>
+                    <option value="Store">Store / Warehouse</option>
+                    <option value="Individual">Individual Donor</option>
+                </select>
+                <input id="entityName" placeholder="Business / Donor Name" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+                
+                <div class="border-t border-white/10 pt-4">
+                    <p class="text-xs text-indigo-400 mb-2 font-bold uppercase">Food Safety Information</p>
+                    <input id="foodItems" placeholder="Food Items (e.g., Rice, 10 Meals)" class="w-full bg-black/20 p-3 rounded-lg mb-3 border border-white/10">
+                    <div class="flex flex-col gap-1 mb-3">
+                        <label class="text-[10px] text-gray-400 ml-1">EXPIRY DATE & TIME</label>
+                        <input id="expiryDate" type="datetime-local" class="w-full bg-black/20 p-3 rounded-lg border border-white/10 text-white">
+                    </div>
+                    <label class="flex items-start gap-2 text-xs text-gray-300 bg-white/5 p-3 rounded-lg border border-white/5">
+                        <input type="checkbox" id="safetyCheck" class="mt-1">
+                        <span>I confirm this food is fresh, hygeinic, and safe for consumption. I take full responsibility for its quality.</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="providerThankYou" class="hidden text-center">
+        <div class="glass p-8 rounded-2xl">
+            <div class="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">✓</div>
+            <h2 class="text-2xl font-bold mb-4">Thank You, Hero!</h2>
+            <p class="text-gray-400 leading-relaxed">
+                Your surplus food donation is now live in the Jamshedpur network. You are directly helping fight hunger in our community.
+            </p>
+            <div class="mt-6 p-4 bg-indigo-500/10 rounded-lg text-sm italic text-indigo-300 border border-indigo-500/20">
+                "Small acts, when multiplied by millions of people, can transform the world."
+            </div>
+        </div>
+    </section>
+
+    <section id="receiverOnboarding" class="hidden">
+        <div class="glass p-6 rounded-2xl">
+            <h2 class="text-xl font-bold mb-4">NGO/Organization Details</h2>
+            <input id="ngoReg" placeholder="Registration Number (NGO Darpan)" class="w-full bg-black/20 p-3 rounded-lg mb-4 border border-white/10">
+            <input id="ngoName" placeholder="Organization Name" class="w-full bg-black/20 p-3 rounded-lg mb-4 border border-white/10">
+        </div>
+    </section>
+
+    <section id="receiverMessagePage" class="hidden">
+        <div class="glass p-8 rounded-2xl">
+            <h2 class="text-xl font-bold mb-4 text-indigo-400">Important Message for Receivers</h2>
+            <div class="space-y-4 text-sm text-gray-300 leading-relaxed">
+                <p>Welcome to the Jamshedpur Rescue Network. As a receiver, you play a critical role in the last-mile delivery of nourishment.</p>
+                <ul class="list-disc ml-5 space-y-2 text-indigo-200">
+                    <li>Please inspect food quality immediately upon pickup.</li>
+                    <li>Ensure transport hygiene is maintained.</li>
+                    <li>The safety audit (rating) must be completed within 1 hour of delivery.</li>
+                </ul>
+                <p class="bg-white/5 p-3 rounded italic">"By accepting, you agree to distribute this food to those in need fairly and safely."</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="locationPage" class="hidden">
+        <div class="glass p-6 rounded-2xl">
+            <h2 class="text-xl font-bold mb-2">Service Point</h2>
+            <div id="map" class="mb-4"></div>
+            <div class="space-y-3">
+                <input id="manualAddr" placeholder="Area (e.g., Telco, Kadma)" class="w-full bg-black/20 p-3 rounded-lg border border-white/10">
+            </div>
+        </div>
+    </section>
+
+    <section id="dashboard" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold" id="dashTitle">Agent Dashboard</h2>
+            <span id="iamTag" class="bg-indigo-500/20 text-indigo-300 text-[10px] px-2 py-1 rounded border border-indigo-500/30 uppercase font-bold tracking-widest"></span>
+        </div>
+        
+        <div id="orderList" class="space-y-4">
+            <div class="glass p-4 rounded-xl border-l-4 border-indigo-500">
+                <p class="text-xs text-indigo-400 font-bold mb-1">MISSION #JSR-992</p>
+                <div id="missionStatus">
+                    <p class="text-sm">Status: <span class="text-yellow-400" id="statusLabel">In Progress</span></p>
+                </div>
+                
+                <div id="ratingSection" class="mt-4 pt-4 border-t border-white/10 hidden">
+                    <p class="text-xs font-bold text-gray-400 mb-2">POST-DELIVERY AUDIT</p>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div>
+                            <label class="text-[10px] block mb-1">Packaging (1-5)</label>
+                            <input type="number" id="ratePack" min="1" max="5" placeholder="5" class="w-full bg-black/40 p-2 rounded text-sm border border-white/10">
+                        </div>
+                        <div>
+                            <label class="text-[10px] block mb-1">Quality (1-5)</label>
+                            <input type="number" id="rateQual" min="1" max="5" placeholder="5" class="w-full bg-black/40 p-2 rounded text-sm border border-white/10">
+                        </div>
+                    </div>
+                    <button onclick="submitRating()" class="w-full bg-indigo-600/40 py-2 rounded text-xs font-bold hover:bg-indigo-600">Submit Review</button>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button id="markReceivedBtn" onclick="confirmReceipt()" class="hidden w-full mb-2 bg-green-600/20 text-green-400 border border-green-600/30 py-2 rounded text-[10px] font-bold">MARK AS RECEIVED</button>
+                    <button onclick="openHelpChat('Support')" class="flex-1 text-[10px] bg-white/10 px-3 py-2 rounded">🆘 Help Desk</button>
+                    <button onclick="openHelpChat(user.role === 'provider' ? 'Receiver' : 'Provider')" id="peerBtn" class="flex-1 text-[10px] bg-indigo-500/20 px-3 py-2 rounded border border-indigo-500/30 font-bold"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="adminDashboard" class="hidden">
+        <h2 class="text-2xl font-bold mb-4">Admin Console</h2>
+        <div class="glass p-4 rounded-xl mb-4">
+            <p class="text-sm font-bold text-red-400">System Permissions</p>
+            <div class="text-xs space-y-2 mt-2 text-gray-400">
+                <p>• Providers: Declare Safety, List Expiry</p>
+                <p>• Receivers: Claim Food, Quality Audit</p>
+                <p>• Admin: All Access, Role Override</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer id="navFooter" class="hidden glass p-4 sticky bottom-0 z-50">
+    <div class="max-w-md mx-auto flex justify-between gap-4">
+        <button id="backBtn" onclick="goBack()" class="flex-1 py-3 bg-white/10 rounded-lg font-bold text-sm">← Back</button>
+        <button id="nextBtn" onclick="goNext()" class="flex-1 py-3 btn-glow rounded-lg font-bold text-sm">Next →</button>
+    </div>
+</footer>
+
+<div id="helpModal" class="hidden fixed bottom-20 right-4 left-4 md:left-auto md:w-80 glass p-4 rounded-2xl shadow-2xl z-[100]">
+    <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+        <h3 class="font-bold" id="chatHeader">Rescue Support</h3>
+        <button onclick="toggleHelp()">✕</button>
+    </div>
+    <div id="chatBody" class="h-48 overflow-y-auto text-sm space-y-2 mb-4">
+        <div class="bg-indigo-500/20 p-2 rounded">Welcome to JSR Rescue Chat. How can we help?</div>
+    </div>
+    <div class="flex gap-2">
+        <input id="helpInput" placeholder="Message..." class="flex-1 bg-black/40 p-2 rounded text-sm">
+        <button onclick="sendHelpMsg()" class="bg-indigo-600 px-3 rounded font-bold">></button>
+    </div>
+</div>
+
+<script>
+    let user = null;
+    let selectedRole = null;
+    let jsrCoords = [22.8046, 86.2029];
+    let map, marker;
+    let captchaNum;
+    let history = ['loginPage'];
+
+    const ADMIN_CREDENTIALS = { email: "admin@jsr.com", pass: "root" };
+
+    function showPage(id, pushToHistory = true) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        
+        const footer = document.getElementById('navFooter');
+        if (['loginPage', 'dashboard', 'adminDashboard'].includes(id)) {
+            footer.classList.add('hidden');
+        } else {
+            footer.classList.remove('hidden');
+        }
+
+        if(id === 'locationPage') setTimeout(initMap, 200);
+        if(pushToHistory && history[history.length - 1] !== id) history.push(id);
+    }
+
+    function goBack() {
+        if (history.length > 1) {
+            history.pop();
+            const prevPage = history[history.length - 1];
+            showPage(prevPage, false);
+        }
+    }
+
+    function goNext() {
+        const current = history[history.length - 1];
+        if (current === 'signupPage') handleSignup();
+        else if (current === 'providerOnboarding') validateProviderDetails();
+        else if (current === 'receiverOnboarding') validateReceiverDetails();
+        else if (current === 'locationPage') confirmLocation();
+        else if (current === 'providerThankYou') { setupDashboard(); showPage('dashboard'); }
+        else if (current === 'receiverMessagePage') { setupDashboard(); showPage('dashboard'); }
+    }
+
+    function generateCaptcha() {
+        captchaNum = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('captchaValue').innerText = captchaNum;
+    }
+
+    function handleSignup() {
+        const name = document.getElementById('sName').value;
+        const email = document.getElementById('sEmail').value;
+        if(!name || !email) return alert("All fields are mandatory.");
+        localStorage.setItem('jsrUser_' + email, JSON.stringify({ name, email, role: null }));
+        alert("Account Created.");
+        showPage('loginPage');
+        generateCaptcha();
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('lEmail').value;
+        const pass = document.getElementById('lPass').value;
+        const cInp = document.getElementById('captchaInput').value;
+        if(cInp != captchaNum) return alert("CAPTCHA Verification Failed.");
+        if(email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.pass) {
+            user = { name: "System Admin", role: "ADMIN" };
+            setupDashboard();
+            showPage('adminDashboard');
+            return;
+        }
+        const stored = localStorage.getItem('jsrUser_' + email);
+        if(stored) {
+            user = JSON.parse(stored);
+            showPage('roleSelectionPage');
+        } else alert("Access Denied.");
+    }
+
+    function selectRole(role) {
+        selectedRole = role;
+        user.role = role;
+        if(role === 'provider') showPage('providerOnboarding');
+        else showPage('receiverOnboarding');
+    }
+
+    function validateProviderDetails() {
+        const food = document.getElementById('foodItems').value;
+        const safety = document.getElementById('safetyCheck').checked;
+        if(!food || !safety) return alert("Please fill food details and confirm safety.");
+        showPage('locationPage');
+    }
+
+    function validateReceiverDetails() {
+        const name = document.getElementById('ngoName').value;
+        if(!name) return alert("Please enter NGO name.");
+        showPage('locationPage');
+    }
+
+    function setupDashboard() {
+        document.getElementById('navUser').innerText = "👤 " + user.name;
+        document.getElementById('iamTag').innerText = user.role || "PENDING";
+        const peerBtn = document.getElementById('peerBtn');
+        const receiveBtn = document.getElementById('markReceivedBtn');
+        if(user.role === 'provider') {
+            peerBtn.innerText = "CONTACT RECEIVER";
+            receiveBtn.classList.add('hidden');
+        } else if(user.role === 'receiver') {
+            peerBtn.innerText = "CONTACT PROVIDER";
+            receiveBtn.classList.remove('hidden');
+        }
+    }
+
+    function confirmReceipt() {
+        document.getElementById('statusLabel').innerText = "Received";
+        document.getElementById('statusLabel').className = "text-green-400";
+        document.getElementById('markReceivedBtn').classList.add('hidden');
+        document.getElementById('ratingSection').classList.remove('hidden');
+    }
+
+    function submitRating() {
+        alert(`Audit Submitted!`);
+        document.getElementById('ratingSection').innerHTML = `<p class="text-green-400 text-xs font-bold py-2">✓ Quality Audit Logged.</p>`;
+    }
+
+    function initMap() {
+        if(map) return;
+        map = L.map('map').setView(jsrCoords, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        marker = L.marker(jsrCoords, {draggable: true}).addTo(map);
+    }
+
+    function confirmLocation() {
+        if(user.role === 'provider') showPage('providerThankYou');
+        else showPage('receiverMessagePage');
+    }
+
+    function toggleHelp() { document.getElementById('helpModal').classList.toggle('hidden'); }
+    
+    function openHelpChat(context) { 
+        toggleHelp(); 
+        document.getElementById('chatHeader').innerText = context + " Interaction"; 
+    }
+
+    function sendHelpMsg() {
+        const inp = document.getElementById('helpInput');
+        if(!inp.value) return;
+        document.getElementById('chatBody').innerHTML += `<div class="text-right"><span class="bg-indigo-600 p-2 rounded inline-block mb-2 text-xs">${inp.value}</span></div>`;
+        inp.value = '';
+    }
+
+    generateCaptcha();
+</script>
+
+</body>
+</html>

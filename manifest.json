@@ -1,0 +1,72 @@
+{
+  "name": "Rescue Bite - Jamshedpur Food Rescue",
+  "short_name": "Rescue Bite",
+  "description": "Connect food donors with NGOs in Jamshedpur to reduce food waste and fight hunger",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["social", "utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='%236366f1'%3ER%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='50' fill='%23a855f7'%3ERescue%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Donation",
+      "short_name": "Donate",
+      "description": "Quickly create a food donation",
+      "url": "/?action=create-donation",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='%2310b981'%3E%2B%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Find Donations",
+      "short_name": "Find",
+      "description": "Browse available food donations",
+      "url": "/?action=find-donations",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='%23f59e0b'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 568'%3E%3Crect fill='%230f172a' width='320' height='568'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='24' fill='%236366f1'%3ERescue Bite%3C/text%3E%3C/svg%3E",
+      "sizes": "320x568",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'%3E%3Crect fill='%230f172a' width='1280' height='720'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' font-size='48' fill='%23a855f7'%3ERescue Bite - Food Rescue Platform%3C/text%3E%3C/svg%3E",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
